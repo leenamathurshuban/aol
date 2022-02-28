@@ -1,0 +1,32 @@
+.employee_col {
+    background-color: #f37220;
+    padding: 15px;
+    text-align: center;
+    min-height: 110px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.employee_col:hover,
+.employee_dashbaord .col-sm-3:nth-child(even) .employee_col:hover {
+	background-color: #007bff;
+}
+.employee_col h3 {
+    font-size: 18px;
+    margin: 0;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+.employee_col h3 a {
+	color:#fff;
+}
+.employee_dashbaord .col-sm-3:nth-child(even) .employee_col{
+    background-color: #333;
+}
+a.popoverComment {
+    background-color: #f70a0a;
+    color: #fff;
+    border-radius: 50%;
+    padding: 1px 5px;
+}

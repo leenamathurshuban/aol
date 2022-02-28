@@ -1,0 +1,239 @@
+@extends('layouts.admin')
+@section('header') @endsection
+
+@section('body')
+	<section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1>Total: {{ $total }}</h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item">
+              	{{link_to_route('employee.home','Home',[],[])}}
+              </li>
+              <li class="breadcrumb-item active">Purchase Order</li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+     <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-12">
+            <div class="card">
+               <div class="card-header">
+                  
+                  {!! Form::open(['route'=>['admin.AdminSingleRequestExport','po'],'method'=>'','files'=>true])!!}
+                  <div class="row">
+                    <div class="col-md-3">
+                      {{ Form::label('From','Request From')}}
+                      {{ Form::date('from','',['class'=>'form-control','placeholder'=>'From']) }}
+                    </div>
+                    <div class="col-md-3">
+                      {{ Form::label('To','To')}}
+                      {{ Form::date('to','',['class'=>'form-control','placeholder'=>'To']) }}
+                    </div>
+                   
+                    <div class="col-md-3 mt-20">
+                      {!! Html::decode(Form::button('<i class="fa fa-file-csv"></i>',['type' => 'submit', 'class'=>'btn btn-dark','title'=>'CSV Export'])) !!}
+                    </div>
+                  </div>
+                  {{ Form::close() }}
+              </div>
+            {!! Form::open(['method'=>'GET','files'=>true])!!}
+              <div class="card-header">
+                <div class="row">
+                {{--  <div class="col-md-3">
+                    {{ Form::label('Vendor','Vendor')}}
+                    {{ Form::select('employee',$emp,$employee,['class'=>'form-control custom-select select2','placeholder'=>'All']) }}
+                  </div>
+                 
+                  <div class="col-md-2">
+                    {{ Form::label('Status','Status')}}
+                    {{ Form::select('status',\App\PurchaseOrder::orderStatusView(),$status,['class'=>'form-control custom-select select2','placeholder'=>'All']) }}
+                  </div>--}}
+                  
+                  <div class="col-md-2">
+                    {{ Form::label('From','PO Start Date From')}}
+                    {{ Form::date('from',$from,['class'=>'form-control','placeholder'=>'From']) }}
+                  </div>
+                  <div class="col-md-2">
+                    {{ Form::label('To','To')}}
+                    {{ Form::date('to',$to,['class'=>'form-control','placeholder'=>'To']) }}
+                  </div>
+                   <div class="col-sm-12 col-md-3">
+                      {{ Form::label('PO No:','PO No:')}}
+                      <div class="row yemm_serachbox">
+                          <div class="col-sm-12 col-md-12 main_serach">
+                              <div class="form-group">
+                                    {{ Form::text('order_id',$order_id,['class'=>'form-control','placeholder'=>'Order Id']) }}
+                                   {!! Html::decode(Form::button('<i class="fa fa-search"></i>',['type' => 'submit', 'class'=>'btn btn-dark'])) !!}
+                              </div>
+                          </div>
+                       </div>
+                      
+                  </div>
+              </div>
+            </div>
+            {!! Form::close() !!}
+              <!-- /.card-header -->
+              <div class="card-body report_main">
+                <div class="wrapper1">
+                    <div class="div1">
+                    </div>
+                </div>
+                <div class="wrapper2">
+                    <div class="div2">
+                      <table id="" class="table table-bordered table-striped report_table">
+                        <thead>
+                        <tr>
+                          <th>Sr:</th>
+                          <th>PO No:</th>
+                          <th>Start Date</th>
+                          <th>End Date</th>
+                          <th>Payment Method</th>
+                          <th>Nature Of Goods</th>
+                          <th>Apex</th>
+                          <th>Vendor</th>
+                          <th>Code</th>
+                          <th>PO Total</th>
+                          <th>PO Total With Margin</th>
+                          <th>Invoice Approved</th>
+                          <th>Invoice In Process</th>
+                          <th>PO Balance</th>
+                          <th>Request By ( Emp.Code)</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                      @forelse($data as $result)
+                       
+                        <tr>
+                          <td>{{ ++$page }}</td>
+                          <td>
+                            {{ $result->order_id }}
+                          </td>
+                         
+                          <td>
+                            {{ \App\Helpers\Helper::onlyDate($result->po_start_date) ?? '' }}
+                            {{--json_decode($result->user_ary)->name ?? ''}} / {{json_decode($result->user_ary)->employee_code ?? ''--}}
+                          </td>
+                          <td>
+                            {{ \App\Helpers\Helper::onlyDate($result->po_end_date) ?? '' }}
+                          </td>
+                          <td>
+                            {{ \App\PurchaseOrder::paymentMethod($result->payment_method) ?? '' }}
+                          </td>
+                          <td>{{ \App\PurchaseOrder::natureOfService($result->nature_of_service) ?? '' }}</td>
+                          <td>{{ json_decode($result->apexe_ary)->name ?? '' }}</td>
+                          <td>
+                            {{ json_decode($result->vendor_ary)->name ?? '' }}
+                          </td>
+                          <td>
+                            {{ json_decode($result->vendor_ary)->vendor_code ?? '' }}
+                          </td>
+                          <td>
+                            {{ env('CURRENCY_SYMBOL') }}{{ $result->total ?? '00' }}
+                          </td>
+                          <td>
+                            {{ env('CURRENCY_SYMBOL') }}{{ \App\Invoice::invoiceLimit($result->net_payable) ?? '00' }}
+                          </td>
+                          <td>
+                            {{ env('CURRENCY_SYMBOL') }}{{ \App\Invoice::approvedPoInvoice($result->id) ?? '00' }}
+                          </td>
+                          <td>
+                            {{ env('CURRENCY_SYMBOL') }}{{ \App\Invoice::proccessPoInvoice($result->id) }}
+                          </td>
+                          <td>
+                            {{ env('CURRENCY_SYMBOL') }}{{ \App\Invoice::poBalance($result->id) }}
+                          </td>
+                          
+                          <td>{{json_decode($result->user_ary)->employee_code ?? ''}}</td>
+                        </tr>
+                       @empty
+                       <tr>
+                          <td colspan="15" class="text-center">Data Not Available</td>
+                        </tr>
+                      @endforelse
+                        </tbody>
+                      </table>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 center-block">
+                        {{$data->appends($_GET)->links()}}
+                    </div>
+                </div>
+              </div>
+              <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+          </div>
+          <!-- /.col -->
+        </div>
+        <!-- /.row -->
+      </div>
+      <!-- /.container-fluid -->
+    </section>
+    <!-- /.content -->
+    <div class="modal fade" id="modal-default">
+      <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+          <div class="modal-header noprint">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body P-0" id="modal-body">
+          </div>
+          <div class="modal-footer justify-content-between">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+        <!-- /.modal-content -->
+      </div>
+    </div>
+  
+@endsection
+
+@section('footer')
+	<script>
+  function getAdminRequestRepDetail(id,type) {
+      if (id) {
+          var url="{{ route('admin.getAdminRequestRepDetail') }}";
+            $.ajax({
+              type:"POST",
+              url:url,
+              data:{slug:id ,type:type, _token: '{{csrf_token()}}'},
+              beforeSend: function(){
+              // $('#preloader').show();
+              },
+              success:function(response){
+                if (response) {
+                    $('#modal-body').html(response);
+                    $('#modal-default').modal('show');
+                }
+               // $('#preloader').hide();
+              }
+            });
+      }
+    }
+$(function(){
+    $(".wrapper1").scroll(function(){
+        $(".wrapper2")
+            .scrollLeft($(".wrapper1").scrollLeft());
+    });
+    $(".wrapper2").scroll(function(){
+        $(".wrapper1")
+            .scrollLeft($(".wrapper2").scrollLeft());
+    });
+});
+
+var wid=$('.table').width();
+$('.div1,.div2').width(wid+'px');
+  </script>
+
+@endsection
